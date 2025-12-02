@@ -1,3 +1,4 @@
+// controllers/authController.js
 const Admin = require("../models/Admin");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
@@ -19,7 +20,10 @@ exports.createAdmin = async (req, res) => {
       restaurant_id
     });
 
-    res.status(201).json({ message: "Admin registered successfully", admin: newAdmin });
+    res.status(201).json({
+      message: "Admin registered successfully",
+      admin: newAdmin
+    });
 
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -29,19 +33,24 @@ exports.createAdmin = async (req, res) => {
 exports.loginAdmin = async (req, res) => {
   try {
     const { username, password } = req.body;
-    const admin = await Admin.findOne({ username });
 
-    if (!admin) return res.status(404).json({ message: "Admin not found" });
+    const admin = await Admin.findOne({ username });
+    if (!admin) return res.status(404).json({ error: "Admin not found" });
 
     const match = await bcrypt.compare(password, admin.password);
-    if (!match) return res.status(400).json({ message: "Incorrect password" });
+    if (!match) return res.status(400).json({ error: "Incorrect password" });
 
+    // Create token
     const token = jwt.sign(
-      { adminId: admin._id, restaurant_id: admin.restaurant_id },
+      {
+        adminId: admin._id,
+        restaurant_id: admin.restaurant_id
+      },
       process.env.JWT_SECRET,
       { expiresIn: "7d" }
     );
 
+    // Store in cookie
     res.cookie("token", token, {
       httpOnly: true,
       secure: false,
@@ -49,7 +58,12 @@ exports.loginAdmin = async (req, res) => {
       maxAge: 7 * 24 * 60 * 60 * 1000
     });
 
-    res.json({ message: "Login successful", adminId: admin._id });
+    return res.json({
+      message: "Login successful",
+      adminId: admin._id,
+      restaurant_id: admin.restaurant_id
+    });
+
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

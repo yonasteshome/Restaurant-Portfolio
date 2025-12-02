@@ -1,41 +1,48 @@
+// controllers/categoryController.js
 const MenuCategory = require("../models/MenuCategory");
 const MenuItem = require("../models/MenuItem");
 
-// ------------------ ADMIN CONTROLLERS ------------------
-
+// ADMIN: Create category
 exports.createCategory = async (req, res) => {
   try {
     const category = await MenuCategory.create({
       restaurant_id: req.restaurant_id,
       category_name: req.body.category_name
     });
+
     res.status(201).json(category);
+
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 };
 
+// ADMIN: Get categories only
 exports.getCategories = async (req, res) => {
   try {
     const categories = await MenuCategory.find({
       restaurant_id: req.restaurant_id
     });
+
     res.json(categories);
+
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 };
 
+// ADMIN: Delete category
 exports.deleteCategory = async (req, res) => {
   try {
     await MenuCategory.findByIdAndDelete(req.params.id);
     res.json({ message: "Category deleted" });
+
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 };
 
-// Admin: categories + items
+// ADMIN: Categories + Items
 exports.getCategoriesWithItems = async (req, res) => {
   try {
     const restaurantId = req.restaurant_id;
@@ -46,35 +53,31 @@ exports.getCategoriesWithItems = async (req, res) => {
     const result = categories.map(category => ({
       _id: category._id,
       category_name: category.category_name,
-      items: items.filter(
-        item => item.category_id.toString() === category._id.toString()
-      )
+      items: items.filter(i => i.category_id.toString() === category._id.toString())
     }));
 
     res.json(result);
+
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 };
 
-// ------------------ PUBLIC CONTROLLERS ------------------
-
-// Public: Get categories (restaurantId from URL)
+// PUBLIC: Get categories
 exports.getPublicCategories = async (req, res) => {
   try {
-    const restaurantId = req.params.restaurantId;
-
     const categories = await MenuCategory.find({
-      restaurant_id: restaurantId
+      restaurant_id: req.params.restaurantId
     });
 
     res.json(categories);
+
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 };
 
-// Public: Get categories + items (restaurantId from URL)
+// PUBLIC: Categories + Items
 exports.getPublicCategoriesWithItems = async (req, res) => {
   try {
     const restaurantId = req.params.restaurantId;
@@ -85,12 +88,11 @@ exports.getPublicCategoriesWithItems = async (req, res) => {
     const result = categories.map(category => ({
       _id: category._id,
       category_name: category.category_name,
-      items: items.filter(
-        item => item.category_id.toString() === category._id.toString()
-      )
+      items: items.filter(i => i.category_id.toString() === category._id.toString())
     }));
 
     res.json(result);
+
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

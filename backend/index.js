@@ -9,10 +9,13 @@ dotenv.config();
 connectDB();
 
 const app = express();
-app.use(cors({
-  origin: "http://localhost:3000", // Change if frontend different
-  credentials: true
-}));
+app.use(
+  cors({
+    origin: (origin, callback) => callback(null, true),
+    credentials: true
+  })
+);
+
 
 app.use(express.json());
 app.use(cookieParser());
